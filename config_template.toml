@@ -1,0 +1,36 @@
+[main]
+# No shares are allowed to exit this directory
+share_root = "./shares/"
+
+[auth]
+
+[[share]]
+# Share in the root folder
+path = "/"
+# Display name / title
+title = "Root Share"
+# Permissions - as granular as possible:
+#   l - list (but not download)
+#   d - download (but not list)
+#   u - upload
+#   r - remove / delete
+#   m - move
+#   . - see hidden files in list
+#   * - all
+[share.perms.group]
+ALL = "ld"
+admin = "*"
+[share.perms.user]
+ALL = "ld"
+
+[[share]]
+# Use ${GROUP} and ${USER} to dynamically create shares for users and groups
+path = "/g/${GROUP}"
+# Special names:
+#   SELF - the group/user this group is associated with
+#   ALL - all users, including non-login
+#   AUTH - all authenticated users
+[share.perms.group]
+SELF = "ldurm"
+ALL = "ld"
+admin = "*"

@@ -1,0 +1,126 @@
+nav.account-nav {
+    display: flex;
+    justify-content: space-between;
+}
+nav.account-nav > ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+nav.account-nav a:hover {
+    text-decoration: underline;
+}
+nav.account-nav a {
+    text-decoration: none;
+}
+nav.account-nav a::before {
+    content: "[";
+}
+nav.account-nav a::after {
+    content: "]";
+}
+
+nav.file-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+nav.file-nav ul {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    gap: 8px;
+    list-style: none;
+}
+nav.file-nav a:hover {
+    text-decoration: underline;
+}
+nav.file-nav a {
+    text-decoration: none;
+}
+nav.file-nav a::before {
+    content: "[";
+}
+nav.file-nav a::after {
+    content: "]";
+}
+
+table.file-list {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+table.file-list th, table.file-list td {
+    border: 3px black;
+    border-style: inset;
+    padding: 3px;
+}
+table.file-list td.controls > div.container {
+    width: 100%;
+    display: flex;
+    justify-content: space-evenly;
+}
+table.file-list tr:hover td.name {
+    text-decoration: underline;
+}
+table.file-list td.name {
+    font-weight: bold;
+}
+td.controls span:hover {
+    text-decoration: underline;
+}
+td.controls span::before {
+    content: "[";
+}
+td.controls span::after {
+    content: "]";
+}
+
+h3.path {
+    width: 100%;
+    text-align: center;
+    margin: 0;
+}
+
+#upload-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+#upload-label:hover {
+    text-decoration: underline;
+}
+#upload-label::before {
+    content: "[";
+}
+#upload-label::after {
+    content: "]";
+}
+#upload-name:hover {
+    text-decoration: underline;
+}
+#upload-name::before {
+    content: "[";
+}
+#upload-name::after {
+    content: "]";
+}
+
+
+a.error-back::before {
+    content: "[";
+}
+a.error-back::after {
+    content: "]";
+}
+a.error-back {
+    text-decoration: none;
+}
+a.error-back:hover {
+    text-decoration: underline;
+}

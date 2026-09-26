@@ -1,0 +1,21 @@
+<nav class="account-nav">
+    <span>Welcome
+    {% if user.details != None %}
+        {{ user.details.display_name }}!
+    {% elif user.backend == AuthBackend.RECOVERY %}
+        Recovery Admin!
+    {% else %}
+        guest!
+    {% endif %}
+    </span>
+    <ul>
+        <li>
+            {% if user.backend == AuthBackend.OIDC %}
+            <a href="{{ api_path }}/auth/logout?next={{ obj.path | urlencode }}">Log out</a>
+            {% else %}
+            <a href="{{ api_path }}/auth/login?next={{ obj.path | urlencode }}">Login</a>
+            {% endif %}
+        </li>
+    </ul>
+</nav>
+<hr>
