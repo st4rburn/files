@@ -353,13 +353,17 @@ class Filesystem:
             # Create blank share with no permissions if none is defined
             root_share = ShareConfig(
                 path = Path("/"),
-                perms = SharePerms()
+                perms = SharePerms(),
+                real = CONFIG.main.share_root
             )
             root = Folder(
                 share=root_share,
                 path_components=[],
                 type=FolderType.VIRTUAL
             )
+        # Make root share if it doesn't exist (it should, shouldn't parse otherwise)
+        if root.share.real is not None and not root.share.real.exists():
+                root.share.real.mkdir(parents=True)
         for share in CONFIG.share:
             parent: Folder = root
             for component in share.path_components[:-1]:
@@ -371,13 +375,16 @@ class Filesystem:
                         path_components=parent.path_components + [component],
                         type=FolderType.VIRTUAL
                     )
+                    new_node.real_path.mkdir(exist_ok=True, parents=True)
                     parent.children[component] = new_node
                     parent = new_node
-            parent.children[share.path_components[-1]] = Folder(
+            new_share: Folder = Folder(
                 share=share,
                 path_components=share.path_components,
                 type=FolderType.SHARE
             )
+            new_share.real_path.mkdir(exist_ok=True, parents=True)
+            parent.children[share.path_components[-1]] = new_share
         return root
 
 # Helper

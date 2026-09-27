@@ -118,7 +118,7 @@ class WebConfig(BaseModel):
 
 class MainConfig(BaseModel):
     site_root: HttpUrl
-    share_root: DirectoryPath
+    share_root: DirectoryPath = Path("/shares")
 
     session_secret: str# = Field(default=secrets.token_hex(32)) # Don't use a factory; must be consistent
     debug: bool = False
