@@ -130,7 +130,7 @@ class ShareConfig(BaseModel):
     path: Path
     # Override share root
     real: DirectoryPath | None = None
-    perms: SharePerms
+    perms: SharePerms = Field(default_factory=SharePerms)
 
     @field_validator("path", mode="after")
     @classmethod

@@ -54,7 +54,10 @@ class File(BaseModel):
     def ensure_allowed(self, user: User, test: ShareACL):
         acl: ShareACL = self.folder.share.perms.evaluate(user)
         if test not in acl:
-            raise PermissionDenied(user, test, self.path_components)
+            if ShareACL.LIST not in acl:
+                raise FileNotFoundError(f"File not found at '{self.path.parent}'.")
+            else:
+                raise PermissionDenied(user, test, self.path_components)
 
     def can_move(self, user: User) -> bool:
         _ = self.real_path
@@ -140,7 +143,10 @@ class Folder(BaseModel):
     def ensure_allowed(self, user: User, test: ShareACL):
         acl: ShareACL = self.share.perms.evaluate(user)
         if test not in acl:
-            raise PermissionDenied(user, test, self.path_components)
+            if ShareACL.LIST not in acl:
+                raise FileNotFoundError(f"File not found at '{self.path.parent}'.")
+            else:
+                raise PermissionDenied(user, test, self.path_components)
 
     def can_download(self, user: User) -> bool:
         return False
