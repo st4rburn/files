@@ -100,9 +100,7 @@ class File(BaseModel):
 
     def op_delete(self, user: User) -> None:
         real: Path = self.real_path
-        acl: ShareACL = self.folder.share.perms.evaluate(user)
-        if ShareACL.REMOVE not in acl:
-            raise PermissionDenied(user, ShareACL.REMOVE, self.path_components)
+        self.ensure_allowed(user, ShareACL.REMOVE)
         real.unlink()
 
     def can_download(self, user: User) -> bool:
@@ -112,9 +110,7 @@ class File(BaseModel):
 
     def op_download(self, user: User) -> BinaryIO:
         real: Path = self.real_path
-        acl: ShareACL = self.folder.share.perms.evaluate(user)
-        if ShareACL.DOWNLOAD not in acl:
-            raise PermissionDenied(user, ShareACL.DOWNLOAD, self.path_components)
+        self.ensure_allowed(user, ShareACL.DOWNLOAD)
         return real.open("rb")
 
 class Folder(BaseModel):
@@ -157,10 +153,8 @@ class Folder(BaseModel):
         # If we're trying to get a path that's not within the share
         # this will throw an error
         _ = self.real_path
-        acl: ShareACL = self.share.perms.evaluate(user)
-        if ShareACL.LIST not in acl:
-            raise PermissionDenied(user, ShareACL.LIST, self.path_components)
-        dotfiles: bool = ShareACL.DOTFILES in acl
+        self.ensure_allowed(user, ShareACL.LIST)
+        dotfiles: bool = ShareACL.DOTFILES in self.share.perms.evaluate(user)
 
         return self.get_items(dotfiles)
 
@@ -171,9 +165,7 @@ class Folder(BaseModel):
 
     def op_mkdir(self, user: User, name: str) -> None:
         real: Path = self.real_path
-        acl: ShareACL = self.share.perms.evaluate(user)
-        if ShareACL.MOVE not in acl:
-            raise PermissionDenied(user, ShareACL.MOVE, self.path_components)
+        self.ensure_allowed(user, ShareACL.MOVE)
         new: Path = real / name
         if new.exists():
             raise FileExistsError()
@@ -234,9 +226,7 @@ class Folder(BaseModel):
         if self.type != FolderType.PHYSICAL:
             raise FilesystemError(f"Folder of type {self.type} cannot be deleted.")
         real: Path = self.real_path
-        acl: ShareACL = self.share.perms.evaluate(user)
-        if ShareACL.REMOVE not in acl:
-            raise PermissionDenied(user, ShareACL.REMOVE, self.path_components)
+        self.ensure_allowed(user, ShareACL.REMOVE)
         for item in self.get_items():
             item.op_delete(user)
         real.rmdir()
@@ -248,9 +238,7 @@ class Folder(BaseModel):
 
     async def op_upload(self, user: User, name: str, file: UploadFile) -> None:
         real: Path = self.real_path
-        acl: ShareACL = self.share.perms.evaluate(user)
-        if ShareACL.UPLOAD not in acl:
-            raise PermissionDenied(user, ShareACL.UPLOAD, self.path_components)
+        self.ensure_allowed(user, ShareACL.UPLOAD)
         new: Path = real / name
         if new.exists():
             raise FileExistsError()
