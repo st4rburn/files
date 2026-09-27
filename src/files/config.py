@@ -34,7 +34,6 @@ class OidcConfig(BaseModel):
     groups_claim: str = "groups"
     roles_claim: str = "roles"
     username_claim: str = "preferred_username"
-    username_as_id: bool = False
 
     private__well_known_url: HttpUrl | None = Field(
         alias="well_known_url", default=None
