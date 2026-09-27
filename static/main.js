@@ -1,4 +1,5 @@
 let rename_target;
+let delete_target;
 let error_dialog_node;
 let error_text_node;
 
@@ -12,9 +13,10 @@ function op_get(event) {
 }
 
 function op_delete(event) {
-    event.stopPropagation();
-    const location = event.target.parentElement.parentElement.parentElement.dataset.href;
-    fetch(location, { method: "DELETE" }).then(
+    if (event.currentTarget.returnValue !== "save") {
+        return;
+    }
+    fetch(delete_target, { method: "DELETE" }).then(
         (response) => {
             if (!response.ok) {
                 response.json().then((result) => {
@@ -86,9 +88,17 @@ function op_mkdir(event) {
     );
 }
 
+function open_delete_dialog(event) {
+    event.stopPropagation();
+    const location = event.currentTarget.parentElement.parentElement.parentElement.dataset.href;
+    delete_target = location;
+    const parts = location.split("/")
+    const name = parts[parts.length - 1]
+    document.getElementById("delete-confirm-name").innerText = name;
+}
 function open_rename_dialog(event) {
     event.stopPropagation();
-    const location = event.target.parentElement.parentElement.parentElement.dataset.href;
+    const location = event.currentTarget.parentElement.parentElement.parentElement.dataset.href;
     rename_target = location;
 }
 function stop_the_prop(event) {
@@ -106,14 +116,16 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
     const deletes = document.getElementsByClassName("delete-button");
     for (let button of deletes) {
-        button.addEventListener("click", op_delete);
+        button.addEventListener("click", open_delete_dialog);
     }
+    const delete_dialog = document.getElementById("delete-form-dialog");
+    delete_dialog.addEventListener("close", op_delete);
+
     const renames = document.getElementsByClassName("rename-button");
     for (let button of renames) {
         // We handle the operation in a modal
         button.addEventListener("click", open_rename_dialog);
     }
-
     const rename_dialog = document.getElementById("rename-form-dialog");
     rename_dialog.addEventListener("close", op_rename);
 

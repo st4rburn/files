@@ -31,10 +31,10 @@
     <td class="controls">
         <div class="container">
             {% if item.can_delete(user) %}
-            <button class="delete-button" data-href="{{ item.path }}">{{ conf.buttons.delete }}</button>
+            <button command="show-modal" commandfor="delete-form-dialog" class="delete-button">{{ conf.buttons.delete }}</button>
             {% endif %}
             {% if item.can_move(user) %}
-            <button command="show-modal" commandfor="rename-form-dialog" class="rename-button" data-href="{{ item.path }}">{{ conf.buttons.rename }}</button>
+            <button command="show-modal" commandfor="rename-form-dialog" class="rename-button"">{{ conf.buttons.rename }}</button>
             {% endif %}
         </div>
     </td>
@@ -65,6 +65,18 @@
         <div class="modal-actions">
             <button type="submit" value="save">save</button>
             <button type="submit" formnovalidate value="cancel">cancel</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="delete-form-dialog">
+    <h3>Confirm Deletion</h3>
+    <form method="dialog">
+        <p>Do you really want to delete '<span id="delete-confirm-name"></span>'?</p>
+
+        <div class="modal-actions">
+            <button type="submit" value="save">yes</button>
+            <button type="submit" formnovalidate value="cancel">no</button>
         </div>
     </form>
 </dialog>
