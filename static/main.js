@@ -1,4 +1,11 @@
 let rename_target;
+let error_dialog_node;
+let error_text_node;
+
+function show_error(message) {
+    error_text_node.innerText = message;
+    error_dialog_node.show();
+}
 
 function op_get(event) {
     window.location.href = event.currentTarget.dataset.href;
@@ -8,7 +15,13 @@ function op_delete(event) {
     event.stopPropagation();
     const location = event.target.parentElement.parentElement.parentElement.dataset.href;
     fetch(location, { method: "DELETE" }).then(
-        () => {
+        (response) => {
+            if (!response.ok) {
+                response.json().then((result) => {
+                    show_error(result.detail);
+                })
+                return;
+            }
             window.location.reload();
         }
     );
@@ -19,16 +32,28 @@ function op_rename(event) {
         return;
     }
     const new_name_input = document.getElementById("rename-form-name");
+    let new_path;
+    if (new_name_input.value.startsWith("/")) {
+        new_path = new_name_input.value;
+    } else {
+        new_path = CURRENT_PATH + "/" + new_name_input.value;
+    }
     fetch(rename_target, {
         method: "PATCH",
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            new_path: CURRENT_PATH + "/" + new_name_input.value
+            new_path: new_path
         })
     }).then(
-        () => {
+        (response) => {
+            if (!response.ok) {
+                response.json().then((result) => {
+                    show_error(result.detail);
+                })
+                return;
+            }
             window.location.reload();
         }
     );
@@ -41,6 +66,9 @@ function open_rename_dialog(event) {
 }
 
 document.addEventListener("DOMContentLoaded", (event) => {
+    error_dialog_node = document.getElementById("error-dialog");
+    error_text_node = document.getElementById("error-content");
+
     const rows = document.getElementsByClassName("file-entry");
     for (let row of rows) {
         row.addEventListener("click", op_get);
