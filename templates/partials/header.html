@@ -11,9 +11,9 @@
     <ul>
         <li>
             {% if user.backend == AuthBackend.OIDC %}
-            <a href="{{ api_path }}/auth/logout?next={{ obj.path | urlencode }}">Log out</a>
+            <a class="button" href="{{ api_path }}/auth/logout?next={{ path | urlencode }}">Log out</a>
             {% else %}
-            <a href="{{ api_path }}/auth/login?next={{ obj.path | urlencode }}">Login</a>
+            <a class="button" href="{{ api_path }}/auth/login?next={{ path | urlencode }}">Login</a>
             {% endif %}
         </li>
     </ul>

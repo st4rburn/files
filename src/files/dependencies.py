@@ -36,3 +36,41 @@ async def resolve_parent(path: Path) -> Folder | FileNotFoundError:
         return e
     assert isinstance(folder, Folder)
     return folder
+
+def json_mode(accept: Annotated[str | None, Header()] = None) -> bool:
+    if accept is None:
+        return True
+    parsed: list[tuple[str, float]] = []
+    for part in accept.split(","):
+        if ";" in part:
+            params: list[str] = part.split(";")
+            name: str = params[0]
+            prio: float = 1.0 # Default
+            params = params[1:]
+            for param in params:
+                if param.count("=") != 1:
+                    raise HTTPException(status.HTTP_400_BAD_REQUEST, "Bad 'Accept' header.")
+                if param.startswith("q="):
+                    raw_prio: str = param[2:]
+                    try:
+                        prio = float(raw_prio)
+                    except ValueError:
+                        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Bad 'Accept' header.")
+            parsed.append((name, prio))
+        else:
+            parsed.append((part, 1.0))
+
+    # Try match based on first preference
+    parsed.sort(key=lambda x: x[1], reverse=True)
+    for mime, _ in parsed:
+        if mime in ("text/html", "application/xhtml+xml", "application/xml"):
+            return False
+        elif mime == "application/json":
+            return True
+
+    # There is an accept header but JSON is not in it
+    # HTML is also not in it, but this may be a weird browser
+    # Either way JSON was explicitly not asked for, and a
+    # developer is more likely to be able to debug that
+    # than a browser user
+    return False

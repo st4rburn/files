@@ -7,17 +7,26 @@ nav.account-nav > ul {
     margin: 0;
     padding: 0;
 }
-nav.account-nav a:hover {
-    text-decoration: underline;
-}
-nav.account-nav a {
-    text-decoration: none;
-}
-nav.account-nav a::before {
+
+button::before, .button::before {
     content: "[";
 }
-nav.account-nav a::after {
+button::after, .button::after {
     content: "]";
+}
+button {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+button, .button {
+    text-decoration: none;
+}
+button:hover, .button:hover {
+    text-decoration: underline;
 }
 
 nav.file-nav {
@@ -31,18 +40,6 @@ nav.file-nav ul {
     padding: 0;
     gap: 8px;
     list-style: none;
-}
-nav.file-nav a:hover {
-    text-decoration: underline;
-}
-nav.file-nav a {
-    text-decoration: none;
-}
-nav.file-nav a::before {
-    content: "[";
-}
-nav.file-nav a::after {
-    content: "]";
 }
 
 table.file-list {
@@ -65,15 +62,6 @@ table.file-list tr:hover td.name {
 }
 table.file-list td.name {
     font-weight: bold;
-}
-td.controls span:hover {
-    text-decoration: underline;
-}
-td.controls span::before {
-    content: "[";
-}
-td.controls span::after {
-    content: "]";
 }
 
 h3.path {
@@ -111,16 +99,11 @@ h3.path {
     content: "]";
 }
 
-
-a.error-back::before {
-    content: "[";
+.modal-actions {
+    display: flex;
+    justify-content: space-evenly;
+    margin-top: 16px;
 }
-a.error-back::after {
-    content: "]";
-}
-a.error-back {
-    text-decoration: none;
-}
-a.error-back:hover {
-    text-decoration: underline;
+dialog > h3 {
+    text-align: center;
 }

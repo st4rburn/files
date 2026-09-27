@@ -111,7 +111,8 @@ class OidcConfig(BaseModel):
 
 class WebButtonsConfig(BaseModel):
     delete: str = "delete"
-    move: str = "move"
+    rename: str = "rename"
+    mkdir: str = "new folder"
 
 class WebConfig(BaseModel):
     buttons: WebButtonsConfig = Field(default_factory=WebButtonsConfig)

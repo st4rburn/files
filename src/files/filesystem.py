@@ -34,11 +34,11 @@ class FolderType(Enum):
 
 class File(BaseModel):
     folder: Folder
-    path_components: list[str]
+    name: str
 
     @property
     def path(self) -> Path:
-        return Path("/", *self.path_components)
+        return self.folder.path / self.name
 
     # This will produce issues if files do not directly belong to
     # their parents, we should always make sure they do
@@ -47,23 +47,51 @@ class File(BaseModel):
     def real_path(self) -> Path:
         return self.folder.real_path / self.path_components[-1]
 
+    @property
+    def path_components(self) -> list[str]:
+        return self.folder.path_components + [self.name]
+
+    def ensure_allowed(self, user: User, test: ShareACL):
+        acl: ShareACL = self.folder.share.perms.evaluate(user)
+        if test not in acl:
+            raise PermissionDenied(user, test, self.path_components)
+
     def can_move(self, user: User) -> bool:
         _ = self.real_path
         acl: ShareACL = self.folder.share.perms.evaluate(user)
         return ShareACL.MOVE in acl
 
     # This is a lot simpler to rename
-    def op_move(self, user: User, name: str) -> None:
-        real: Path = self.real_path
-        acl: ShareACL = self.folder.share.perms.evaluate(user)
-        if ShareACL.MOVE not in acl:
-            raise PermissionDenied(user, ShareACL.MOVE, self.path_components)
-        new: Path = real.parent / name
-        if new.exists():
-            raise FileExistsError()
-        self.real_path.rename(new)
-        self.path_components.pop(-1)
-        self.path_components.append(name)
+    def op_move(self, user: User, new_path: Path) -> None:
+        # Essential checks:
+        # 1. We are allowed to move FROM this folder
+        # 2. We are moving into a folder
+        # 3. IF FOLDER EXTERNAL TO SHARE
+        #   1. Are we allowed to delete from origin share?
+        #   2. Are we allowed to move and upload in destination?
+        # 4. Does this file exist in the destination as a share or file?
+        self.ensure_allowed(user, ShareACL.MOVE)
+
+        # Ensure we're moving to a folder
+        new_parent: Folder | File = FILESYSTEM.tree.resolve(new_path.parent)
+        if isinstance(new_parent, File):
+            raise FileExistsError("Would-be parent folder is a file.")
+
+        # Check if user can move to this share, requires move|upload perm
+        if new_parent.share != self.folder.share:
+            new_parent.ensure_allowed(user, ShareACL.MOVE | ShareACL.UPLOAD)
+            self.ensure_allowed(user, ShareACL.REMOVE)
+
+        # Make sure parent doesn't have any child shares with this
+        # name or any folders
+        new_name: str = new_path.name
+        if new_path.exists() or new_name in new_parent.children:
+            raise FileExistsError("Share or folder already exists with this path")
+
+        # Do the move
+        self.real_path.rename(new_parent.real_path / new_name)
+        self.folder = new_parent
+        self.name = new_name
 
     def can_delete(self, user: User) -> bool:
         _ = self.real_path
@@ -113,6 +141,11 @@ class Folder(BaseModel):
         assert isinstance(parent, Folder)
         return parent
 
+    def ensure_allowed(self, user: User, test: ShareACL):
+        acl: ShareACL = self.share.perms.evaluate(user)
+        if test not in acl:
+            raise PermissionDenied(user, test, self.path_components)
+
     def can_list(self, user: User) -> bool:
         # If we're trying to get a path that's not within the share
         # this will throw an error
@@ -153,22 +186,39 @@ class Folder(BaseModel):
         acl: ShareACL = self.share.perms.evaluate(user)
         return ShareACL.MOVE in acl
 
-    def op_move(self, user: User, name: str) -> None:
+    def op_move(self, user: User, new_path: Path) -> None:
+        # Essential checks:
+        # 1. This is a physical folder
+        # 2. We are allowed to move FROM it
+        # 3. We are moving into a folder
+        # 4. IF FOLDER EXTERNAL TO SHARE
+        #   1. Are we allowed to delete from origin share?
+        #   2. Are we allowed to move and upload in destination?
+        # 5. Does this file exist in the destination as a share or file?
         if self.type != FolderType.PHYSICAL:
             raise FilesystemError(f"Folder of type {self.type} cannot be renamed.")
-        real: Path = self.real_path
-        acl: ShareACL = self.share.perms.evaluate(user)
-        if ShareACL.MOVE not in acl:
-            raise PermissionDenied(user, ShareACL.MOVE, self.path_components)
-        new: Path = real.parent / name
-        parent: Folder = self.parent
+        # Ensure we can move this folder
+        self.ensure_allowed(user, ShareACL.MOVE)
+
+        # Ensure we're moving to a folder
+        new_parent: Folder | File = FILESYSTEM.tree.resolve(new_path.parent)
+        if isinstance(new_parent, File):
+            raise FileExistsError("Would-be parent folder is a file.")
+
+        # Check if user can move to this share, requires move|upload perm
+        if new_parent.share != self.share:
+            new_parent.ensure_allowed(user, ShareACL.MOVE | ShareACL.UPLOAD)
+            self.ensure_allowed(user, ShareACL.REMOVE)
+
         # Make sure parent doesn't have any child shares with this
         # name or any folders
-        if new.exists() or name in parent.children:
-            raise FileExistsError()
-        self.real_path.rename(new)
-        self.path_components.pop(-1)
-        self.path_components.append(name)
+        new_name: str = new_path.name
+        if new_path.exists() or new_name in new_parent.children:
+            raise FileExistsError("Share or folder already exists with this path")
+
+        self.real_path.rename(new_parent.real_path / new_name)
+        self.path_components.clear()
+        self.path_components += Folder.neat_path(new_path)
 
     def can_delete(self, user: User) -> bool:
         if self.type != FolderType.PHYSICAL:
@@ -227,7 +277,7 @@ class Folder(BaseModel):
                     continue
                 yield File(
                     folder=self,
-                    path_components=self.path_components + [item.name]
+                    name=item.name
                 )
             else:
                 # Ignore special files
@@ -319,7 +369,7 @@ class Folder(BaseModel):
             )
             return File(
                 folder=parent,
-                path_components=path
+                name=path[-1]
             )
         else:
             raise FileNotFoundError()

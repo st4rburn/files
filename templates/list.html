@@ -3,9 +3,9 @@
 <h3 class="path">{{ obj.path }}</h3>
 <nav class="file-nav">
     <ul>
-        <li><a href="{{ parent.path }}">Parent folder</a></li>
-        <li><a onclick="history.back();">Back</a></li>
-        <li><a onclick="history.forward();">Forward</a></li>
+        <li><a class="button" href="{{ parent.path }}">Parent folder</a></li>
+        <li><button onclick="history.back();">Back</></li>
+        <li><button onclick="history.forward();">Forward</></li>
     </ul>
     {% if obj.can_upload(user) %}
     <form id="upload-form" action="{{ obj.path }}" method="POST" enctype="multipart/form-data">
@@ -26,14 +26,28 @@
     <td class="controls">
         <div class="container">
             {% if item.can_delete(user) %}
-            <span class="delete-button" data-href="{{ item.path }}">{{ conf.buttons.delete }}</span>
+            <button class="delete-button" data-href="{{ item.path }}">{{ conf.buttons.delete }}</button>
             {% endif %}
             {% if item.can_move(user) %}
-            <span class="move-button" data-href="{{ item.path }}">{{ conf.buttons.move }}</span>
+            <button command="show-modal" commandfor="rename-form-dialog" class="rename-button" data-href="{{ item.path }}">{{ conf.buttons.rename }}</button>
             {% endif %}
         </div>
     </td>
 </tr>
 {% endfor %}
 </table>
+
+<!-- HTML5 native rename dialog -->
+<dialog id="rename-form-dialog">
+    <h3>Rename File</h3>
+    <form method="dialog">
+        <label for="name">New name:</label>
+        <input type="text" id="rename-form-name" name="name" required>
+
+        <div class="modal-actions">
+            <button type="submit" value="save">save</button>
+            <button type="submit" formnovalidate value="cancel">cancel</button>
+        </div>
+    </form>
+</dialog>
 {% endblock %}

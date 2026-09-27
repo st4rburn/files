@@ -1,4 +1,7 @@
 <meta charset="UTF-8">
 <title>{% block title %}{% endblock %}</title>
 <link rel="stylesheet" type="text/css" href="/static/style.css">
+<!-- Not relying on window.location allows us to host the app at
+     different paths. -->
+<script type="text/javascript">const CURRENT_PATH="{{ path }}";</script>
 <script type="text/javascript" src="/static/main.js"></script>
