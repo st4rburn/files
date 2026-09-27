@@ -133,6 +133,8 @@ async def upload(
         return html_error(json_mode, request, status.HTTP_404_NOT_FOUND, user, path, f"Folder not found at '/{path.parent}'.")
     except FileExistsError:
         return html_error(json_mode, request, status.HTTP_409_CONFLICT, user, path, f"File already exists at '/{path}'.")
+    except ValueError as e:
+        return html_error(json_mode, request, status.HTTP_400_BAD_REQUEST, user, path, "Bad folder name: " + str(e))
 
     if json_mode:
         return None

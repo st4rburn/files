@@ -166,6 +166,8 @@ class Folder(BaseModel):
     def op_mkdir(self, user: User, name: str) -> None:
         real: Path = self.real_path
         self.ensure_allowed(user, ShareACL.MOVE)
+        if "/" in name:
+            raise ValueError("Folder name cannot contain '/'.")
         new: Path = real / name
         if new.exists():
             raise FileExistsError()
@@ -239,6 +241,8 @@ class Folder(BaseModel):
     async def op_upload(self, user: User, name: str, file: UploadFile) -> None:
         real: Path = self.real_path
         self.ensure_allowed(user, ShareACL.UPLOAD)
+        if "/" in name:
+            raise ValueError("Folder name cannot contain '/'.")
         new: Path = real / name
         if new.exists():
             raise FileExistsError()
