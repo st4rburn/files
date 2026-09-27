@@ -24,5 +24,19 @@ It should also be noted that any dynamic shares created under one username claim
 
 ### Known Flaws
 
-It is currently possible to see that shares you can't access exist when they're not below dotted names (or the user has dotfile permissions). You can't list, download, or perform any other operation but you can see they exist.
-Eventually this should be fixed but this is not a high priority.
+It is currently possible to see folders leading to shares you can't access when they're not below dotted names (or the user has dotfile permissions). It is not possible to determine the name or any information about the shares below, but it is possible to see that a share must exist there. A good solution to this issue is not currently known, and the impact is minimal, so this is a low priority issue.
+
+If this bothers you though, mitigation is simple: a share can be created under the root share with no permissions set, and all secret shares put below this one. Due to no user having list permission on the upper share, it will not be possible to see the names of any folders below this.
+
+```toml
+[[share]]
+path = "/private"
+# No permissions = no one can enumerate below this
+
+[[share]]
+path = "/private/secrets"
+# Allow all permissions for admin, list+download for secret viewer user
+[share.perms.user]
+admin = "*"
+secret_viewer = "ld"
+```
