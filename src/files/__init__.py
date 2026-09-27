@@ -171,6 +171,8 @@ def move(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
     except FileNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found.")
+    except FileExistsError:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="File already exists.")
 
 def main():
     uvicorn.run("files:app", host="0.0.0.0", port=8000, reload=True, log_level="debug", proxy_headers=True, forwarded_allow_ips="*")
