@@ -165,7 +165,16 @@ class Folder(BaseModel):
         self.ensure_allowed(user, ShareACL.LIST)
         dotfiles: bool = ShareACL.DOTFILES in self.share.perms.evaluate(user)
 
-        return self.get_items(dotfiles, sort=True)
+        # For quicker comparison
+        my_share: ShareConfig = self.share
+        for item in self.get_items(dotfiles, sort=True):
+            # If this user doesn't have list permissions on the share
+            # we're looking at now, make it invisible
+            if isinstance(item, Folder) and item.share != my_share:
+                acl: ShareACL = item.share.perms.evaluate(user)
+                if ShareACL.LIST not in acl:
+                    continue
+            yield item
 
     def can_mkdir(self, user: User) -> bool:
         _ = self.real_path
