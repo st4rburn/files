@@ -159,7 +159,7 @@ class Folder(BaseModel):
         self.ensure_allowed(user, ShareACL.LIST)
         dotfiles: bool = ShareACL.DOTFILES in self.share.perms.evaluate(user)
 
-        return self.get_items(dotfiles)
+        return self.get_items(dotfiles, sort=True)
 
     def can_mkdir(self, user: User) -> bool:
         _ = self.real_path
@@ -256,8 +256,13 @@ class Folder(BaseModel):
                     break
                 f.write(chunk)
 
-    def get_items(self, dotfiles: bool = False) -> Generator[Folder | File]:
-        for item in self.real_path.iterdir():
+    def get_items(self, dotfiles: bool = False, sort: bool = False) -> Generator[Folder | File]:
+        generator: Generator[Path] | list[Path] = self.real_path.iterdir()
+        # This takes more time but is better for display
+        if sort:
+            # Directories first (False = 0), then alphabetical
+            generator = sorted(generator, key=lambda path: (not path.is_dir(), path.name))
+        for item in generator:
             if item.is_dir():
                 if item.name in self.children:
                     yield self.children[item.name]
