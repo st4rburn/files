@@ -112,7 +112,8 @@ class OidcConfig(BaseModel):
 class WebButtonsConfig(BaseModel):
     delete: str = "delete"
     rename: str = "rename"
-    mkdir: str = "new folder"
+    # Capitals standard for top nav items
+    mkdir: str = "New Folder"
 
 class WebConfig(BaseModel):
     buttons: WebButtonsConfig = Field(default_factory=WebButtonsConfig)

@@ -59,10 +59,40 @@ function op_rename(event) {
     );
 }
 
+function op_mkdir(event) {
+    if (event.currentTarget.returnValue !== "save") {
+        return;
+    }
+    const name_input = document.getElementById("mkdir-form-name");
+    let name = name_input.value;
+    fetch(CURRENT_PATH, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            name: name
+        })
+    }).then(
+        (response) => {
+            if (!response.ok) {
+                response.json().then((result) => {
+                    show_error(result.detail);
+                })
+                return;
+            }
+            window.location.reload();
+        }
+    );
+}
+
 function open_rename_dialog(event) {
     event.stopPropagation();
     const location = event.target.parentElement.parentElement.parentElement.dataset.href;
     rename_target = location;
+}
+function stop_the_prop(event) {
+    event.stopPropagation();
 }
 
 document.addEventListener("DOMContentLoaded", (event) => {
@@ -86,6 +116,11 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
     const rename_dialog = document.getElementById("rename-form-dialog");
     rename_dialog.addEventListener("close", op_rename);
+
+    const mkdir_dialog = document.getElementById("mkdir-form-dialog");
+    mkdir_dialog.addEventListener("close", op_mkdir);
+    const mkdir_button = document.getElementById("mkdir-button");
+    mkdir_button.addEventListener("click", stop_the_prop);
 
     const upload_input = document.getElementById("upload-input");
     const upload_name = document.getElementById("upload-name");

@@ -41,6 +41,10 @@ nav.file-nav ul {
     gap: 8px;
     list-style: none;
 }
+div.file-nav-right {
+    display: flex;
+    gap: 8px;
+}
 
 table.file-list {
     width: 100%;

@@ -2,18 +2,23 @@
 {% block content %}
 <h3 class="path">{{ obj.path }}</h3>
 <nav class="file-nav">
-    <ul>
+    <ul class="file-nav-left">
         <li><a class="button" href="{{ parent.path }}">Parent folder</a></li>
         <li><button onclick="history.back();">Back</></li>
         <li><button onclick="history.forward();">Forward</></li>
     </ul>
-    {% if obj.can_upload(user) %}
-    <form id="upload-form" action="{{ obj.path }}" method="POST" enctype="multipart/form-data">
-        <label id="upload-label" for="upload-input" class="custom-file-label">Choose File</label>
-        <input type="file" id="upload-input" name="file">
-        <span id="upload-name" style="display: none;"></span>
-    </form>
-    {% endif %}
+    <div class="file-nav-right">
+        {% if obj.can_mkdir(user) %}
+        <button command="show-modal" commandfor="mkdir-form-dialog" id="mkdir-button">{{ conf.buttons.mkdir }}</button>
+        {% endif %}
+        {% if obj.can_upload(user) %}
+        <form id="upload-form" action="{{ obj.path }}" method="POST" enctype="multipart/form-data">
+            <label id="upload-label" for="upload-input" class="custom-file-label">Choose File</label>
+            <input type="file" id="upload-input" name="file">
+            <span id="upload-name" style="display: none;"></span>
+        </form>
+        {% endif %}
+    </div>
 </nav>
 <table class="file-list">
 <thead>
@@ -43,6 +48,19 @@
     <form method="dialog">
         <label for="name">New name:</label>
         <input type="text" id="rename-form-name" name="name" required>
+
+        <div class="modal-actions">
+            <button type="submit" value="save">save</button>
+            <button type="submit" formnovalidate value="cancel">cancel</button>
+        </div>
+    </form>
+</dialog>
+
+<dialog id="mkdir-form-dialog">
+    <h3>New Folder</h3>
+    <form method="dialog">
+        <label for="name">Name:</label>
+        <input type="text" id="mkdir-form-name" name="name" required>
 
         <div class="modal-actions">
             <button type="submit" value="save">save</button>
