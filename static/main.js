@@ -131,9 +131,6 @@ document.addEventListener("DOMContentLoaded", (event) => {
             upload_name.innerText = "Submit '" + file.name + "'";
             upload_name.style.display = "inline";
         });
-        upload_name.addEventListener("click", (event) => {
-            upload_form.submit();
-        });
     }
 
     console.log("Set event listeners!");

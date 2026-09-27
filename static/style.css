@@ -84,24 +84,6 @@ h3.path {
     clip: rect(0, 0, 0, 0);
     border: 0;
 }
-#upload-label:hover {
-    text-decoration: underline;
-}
-#upload-label::before {
-    content: "[";
-}
-#upload-label::after {
-    content: "]";
-}
-#upload-name:hover {
-    text-decoration: underline;
-}
-#upload-name::before {
-    content: "[";
-}
-#upload-name::after {
-    content: "]";
-}
 
 .modal-actions {
     display: flex;
