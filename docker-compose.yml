@@ -1,0 +1,13 @@
+services:
+  files:
+    # For use with a reverse proxy
+    hostname: files
+    image: st4rburn/files
+    # Ensure config files and shares are mounted so data persists
+    volumes:
+      - ./config.toml:/app/config.toml:ro
+      - ./shares:/shares
+    # Expose the service on port 8000 on the host
+    # In production this should be put behind a reverse proxy supporting TLS
+    ports:
+      - 8000:8000
