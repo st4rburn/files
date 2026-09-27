@@ -24,6 +24,7 @@ button {
 }
 button, .button {
     text-decoration: none;
+    color: black;
 }
 button:hover, .button:hover {
     text-decoration: underline;
@@ -51,6 +52,9 @@ table.file-list {
     table-layout: fixed;
     border-collapse: collapse;
 }
+table.file-list td.controls-column, table.file-list th.controls-column {
+    width: 215px;
+}
 table.file-list th, table.file-list td {
     border: 3px black;
     border-style: inset;
@@ -66,6 +70,12 @@ table.file-list tr:hover td.name {
 }
 table.file-list td.name {
     font-weight: bold;
+}
+tr.file-entry.share td.name::after {
+    content: "/ [share]";
+}
+tr.file-entry.virtual td.name::after, tr.file-entry.physical td.name::after {
+    content: "/";
 }
 
 h3.path {

@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
+{% if obj.share.title != None %}
+<h3 class="path">{{ obj.share.title }} [{{ obj.path }}]</h3>
+{% else %}
 <h3 class="path">{{ obj.path }}</h3>
+{% endif %}
 <nav class="file-nav">
     <ul class="file-nav-left">
         <li><a class="button" href="{{ parent.path }}">Parent folder</a></li>
@@ -22,14 +26,17 @@
 </nav>
 <table class="file-list">
 <thead>
-    <th colspan="4">File Name</th>
-    <th>Controls</th>
+    <th>File Name</th>
+    <th class="controls-column">Controls</th>
 </thead>
 {% for item in items %}
 <tr class="file-entry {{ classify(item) }}" data-href="{{ item.path }}">
-    <td class="name" colspan="4">{{ item.path.name }}</td>
-    <td class="controls">
+    <td class="name">{{ item.path.name }}</td>
+    <td class="controls" class="controls-column">
         <div class="container">
+            {% if item.can_download(user) %}
+            <a class="button download-button" href="{{ item.path }}">{{ conf.buttons.download }}</a>
+            {% endif %}
             {% if item.can_delete(user) %}
             <button command="show-modal" commandfor="delete-form-dialog" class="delete-button">{{ conf.buttons.delete }}</button>
             {% endif %}

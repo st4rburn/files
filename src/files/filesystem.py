@@ -142,6 +142,9 @@ class Folder(BaseModel):
         if test not in acl:
             raise PermissionDenied(user, test, self.path_components)
 
+    def can_download(self, user: User) -> bool:
+        return False
+
     def can_list(self, user: User) -> bool:
         # If we're trying to get a path that's not within the share
         # this will throw an error
