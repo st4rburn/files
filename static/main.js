@@ -136,7 +136,6 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
     const upload_input = document.getElementById("upload-input");
     const upload_name = document.getElementById("upload-name");
-    const upload_form = document.getElementById("upload-form");
     if (upload_input !== null) {
         upload_input.addEventListener("change", (event) => {
             const file = event.target.files[0];
