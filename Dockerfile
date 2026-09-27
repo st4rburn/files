@@ -3,6 +3,9 @@ FROM python:3.13-slim
 # Copy uv from official image
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
+RUN apt-get update && apt-get install -y --no-install-recommends media-types \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN mkdir /shares
 RUN groupadd --gid 1000 app && \
     useradd --uid 1000 --gid app --shell /bin/sh -m -d /app app
