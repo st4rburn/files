@@ -207,3 +207,19 @@ path = "/private/secrets"
 admin = "*"
 secret_viewer = "ld"
 ```
+
+## Roadmap
+
+### Authentication
+
+- [ ] LDAP/Kerberos
+  - [ ] Potentially support in web browser?
+- [ ] Local auth
+  - [ ] BCrypt
+  - [ ] Plaintext (insecure)
+  - [ ] Locally defined groups
+
+### Protocols
+
+- [ ] SMB
+  - [ ] Support LDAP/Kerberos auth
