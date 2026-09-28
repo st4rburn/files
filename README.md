@@ -178,7 +178,17 @@ Generally when using OIDC, it would be recommended to assign access based on gro
 
 It should also be noted that any dynamic shares created under one username claim will not transfer to another, and migrating from `"preferred_username"` to `"sub"` may cause a user to lose access to their files if the folders are not renamed.
 
-### Known Flaws
+### Docker Image
+
+The Docker image is designed to sit behind a reverse proxy and will accept proxy headers from any IP address. Please ensure this is not directly exposed to the internet as this could widen your attack surface.
+
+### Known Flaws / Misconfigurations
+
+#### Old/Removed Shares
+
+Removing shares from the configuration file will cause those folders to inherit permisions from the share they were originally below, make sure any sensitive files are deleted if this would allow for more permissive access than previously available.
+
+#### Enumeration
 
 It is currently possible to see folders leading to shares you can't access when they're not below dotted names (or the user has dotfile permissions). It is not possible to determine the name or any information about the shares below, but it is possible to see that a share must exist there. A good solution to this issue is not currently known, and the impact is minimal, so this is a low priority issue.
 
