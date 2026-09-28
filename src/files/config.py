@@ -10,7 +10,7 @@ from datetime import timedelta
 import requests
 import tomllib
 from pathlib import Path
-from pydantic import BaseModel, DirectoryPath, Field, field_validator, HttpUrl
+from pydantic import BaseModel, DirectoryPath, Field, FilePath, field_validator, HttpUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Annotated, Self
 
@@ -21,6 +21,9 @@ CONFIG_FILE: str = "config.toml"
 ONLY_OS_ENV: bool = os.getenv("NO_CONFIG_FILE") is not None
 
 _SLASH_DEDUPE: re.Pattern = re.compile("/+")
+
+STATIC_CSS: Path = Path("static/extra/css")
+STATIC_JS: Path = Path("static/extra/js")
 
 class ApiConfig(BaseModel):
     recovery_token: str | None = None
@@ -81,7 +84,6 @@ class OidcConfig(BaseModel):
             value: HttpUrl | None = getattr(self, "private__" + key)
             if value is None:
                 if key in well_known:
-                    print(self, key, well_known[key])
                     setattr(self, "private__" + key, well_known[key])
                 else:
                     raise ValueError(
@@ -117,6 +119,38 @@ class WebButtonsConfig(BaseModel):
 
 class WebConfig(BaseModel):
     buttons: WebButtonsConfig = Field(default_factory=WebButtonsConfig)
+    default_style: bool = True
+    extra_styles: list[Path] = []
+    default_script: bool = True
+    extra_scripts: list[Path] = []
+    extra_head: str | None = None
+
+    @classmethod
+    def ensure_files(cls, path: Path, base: Path) -> None:
+        if path.is_absolute() or not (base / path).is_file():
+            raise ValueError(f"Path must be a real file relative to app's '{base}'")
+
+    @field_validator("extra_styles")
+    @classmethod
+    def validate_style_paths(cls, paths: list[Path]) -> list[Path]:
+        for path in paths:
+            cls.ensure_files(path, STATIC_CSS)
+        return paths
+
+    @field_validator("extra_scripts")
+    @classmethod
+    def validate_script_paths(cls, paths: list[Path]) -> list[Path]:
+        for path in paths:
+            cls.ensure_files(path, STATIC_JS)
+        return paths
+
+    # Helpers for passing into page renderer
+    @property
+    def custom_css_base(self) -> str:
+        return str(STATIC_CSS)
+    @property
+    def custom_js_base(self) -> str:
+        return str(STATIC_JS)
 
 class MainConfig(BaseModel):
     site_root: HttpUrl

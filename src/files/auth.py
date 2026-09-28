@@ -74,7 +74,6 @@ async def login(request: Request, next: str = "/"):
     code_verifier: str = generate_token(48)
 
     redirect_uri = request.url_for("auth")
-    print(request.session)
     return await oauth.primary.authorize_redirect( # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
         request,
         redirect_uri,
@@ -93,7 +92,6 @@ async def auth(request: Request):
     assert CONFIG.oidc is not None
 
     if "user" in request.session:
-        print("kjsdfjhs")
         return RedirectResponse(url="/")
 
     #code_verifier: str = request.session.pop("pkce_code_verifier", None) # pyright: ignore[reportAny]
