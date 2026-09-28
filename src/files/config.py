@@ -25,10 +25,6 @@ _SLASH_DEDUPE: re.Pattern = re.compile("/+")
 STATIC_CSS: Path = Path("static/extra/css")
 STATIC_JS: Path = Path("static/extra/js")
 
-class ApiConfig(BaseModel):
-    recovery_token: str | None = None
-    path: str = "/_"
-
 
 class OidcConfig(BaseModel):
     issuer: HttpUrl
@@ -112,6 +108,7 @@ class OidcConfig(BaseModel):
 
 class AuthConfig(BaseModel):
     oidc: OidcConfig | None = None
+    recovery_token: str | None = None
 
 class WebButtonsConfig(BaseModel):
     delete: str = "delete"
@@ -121,6 +118,7 @@ class WebButtonsConfig(BaseModel):
     mkdir: str = "New Folder"
 
 class WebConfig(BaseModel):
+    api_path: str = "/_"
     buttons: WebButtonsConfig = Field(default_factory=WebButtonsConfig)
     default_style: bool = True
     extra_styles: list[Path] = []
@@ -165,10 +163,9 @@ class MainConfig(BaseModel):
 class Config(BaseSettings):
     model_config = SettingsConfigDict(env_nested_delimiter="__")
 
+    auth: AuthConfig = Field(default_factory=AuthConfig)
     web: WebConfig = Field(default_factory=WebConfig)
     main: MainConfig
-    api: ApiConfig = Field(default_factory=ApiConfig) # Instantiate using all defaults, will succeed here
-    auth: AuthConfig = Field(default_factory=AuthConfig)
 
     share: list[ShareConfig] = Field(default_factory=list)
 
@@ -186,7 +183,7 @@ class Config(BaseSettings):
     @property
     def api_root(self) -> str:
         # Something like '/testing///path//' should end up as 'testing/path'
-        offset: str = re.sub(_SLASH_DEDUPE, "/", self.api.path.strip("/"))
+        offset: str = re.sub(_SLASH_DEDUPE, "/", self.web.api_path.strip("/"))
         return str(self.main.site_root) + "/" + offset + "/"
 
 CONFIG: Config

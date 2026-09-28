@@ -31,8 +31,8 @@ app.add_middleware(
 app.add_middleware(SessionMiddleware, secret_key=CONFIG.main.session_secret)
 
 # Include routers
-api = APIRouter(prefix=CONFIG.api.path, tags=["api"])
-api.mount(f"{CONFIG.api.path}/static", StaticFiles(directory="static"), name="static")
+api = APIRouter(prefix=CONFIG.web.api_path, tags=["api"])
+api.mount(f"{CONFIG.web.api_path}/static", StaticFiles(directory="static"), name="static")
 api.include_router(auth.router)
 
 app.include_router(api)
@@ -56,7 +56,6 @@ def html_error(json_mode: bool, request: Request, status: int, user: User, path:
             "user": user,
             "path": "/" + str(path),
             "conf": CONFIG.web,
-            "api_path": CONFIG.api.path,
             "AuthBackend": AuthBackend
         }, status)
 
@@ -88,7 +87,6 @@ def browse(
                     # Required for header
                     "user": user,
                     "conf": CONFIG.web,
-                    "api_path": CONFIG.api.path,
                     "AuthBackend": AuthBackend
                 })
         else:

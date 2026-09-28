@@ -1,16 +1,16 @@
 <meta charset="UTF-8">
 <title>{% block title %}{% endblock %}</title>
 {% if conf.default_style %}
-<link rel="stylesheet" type="text/css" href="{{ api_path }}/static/style.css">
+<link rel="stylesheet" type="text/css" href="{{ conf.api_path }}/static/style.css">
 {% endif %}
 {% for style in conf.extra_styles %}
-<link rel="stylesheet" type="text/css" href="{{ api_path }}/{{ conf.custom_css_base }}/{{ style }}">
+<link rel="stylesheet" type="text/css" href="{{ conf.api_path }}/{{ conf.custom_css_base }}/{{ style }}">
 {% endfor %}
 {% if conf.default_script %}
-<script type="text/javascript" src="{{ api_path }}/static/main.js"></script>
+<script type="text/javascript" src="{{ conf.api_path }}/static/main.js"></script>
 {% endif %}
 {% for script in conf.extra_scripts %}
-<script type="text/javascript" src="{{ api_path }}/{{ conf.custom_js_base }}/{{ script }}"></script>
+<script type="text/javascript" src="{{ conf.api_path }}/{{ conf.custom_js_base }}/{{ script }}"></script>
 {% endfor %}
 <!-- Not relying on window.location allows us to host the app at
      different paths. -->
