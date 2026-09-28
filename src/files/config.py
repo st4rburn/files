@@ -110,6 +110,9 @@ class OidcConfig(BaseModel):
         assert self.private__jwks_uri is not None
         return self.private__jwks_uri
 
+class AuthConfig(BaseModel):
+    oidc: OidcConfig | None = None
+
 class WebButtonsConfig(BaseModel):
     delete: str = "delete"
     rename: str = "rename"
@@ -165,7 +168,7 @@ class Config(BaseSettings):
     web: WebConfig = Field(default_factory=WebConfig)
     main: MainConfig
     api: ApiConfig = Field(default_factory=ApiConfig) # Instantiate using all defaults, will succeed here
-    oidc: OidcConfig | None = None
+    auth: AuthConfig = Field(default_factory=AuthConfig)
 
     share: list[ShareConfig] = Field(default_factory=list)
 

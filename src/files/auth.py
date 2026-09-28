@@ -23,7 +23,7 @@ OIDC_PUBKEYS: JwksResponse = {"keys": []}
 # 192.168.2.32:8000/_/auth/login
 
 # Set up staff realm
-if CONFIG.oidc is not None:
+if CONFIG.auth.oidc is not None:
     # authorize_url = authorization_endpoint
     # access_token_url = token_endpoint
     # = revocation_endpoint
@@ -31,20 +31,20 @@ if CONFIG.oidc is not None:
     # = userinfo_endpoint
     oauth.register(
         name="primary",
-        client_id=CONFIG.oidc.client_id,
-        access_token_url=str(CONFIG.oidc.token_endpoint),
+        client_id=CONFIG.auth.oidc.client_id,
+        access_token_url=str(CONFIG.auth.oidc.token_endpoint),
         access_token_params=None,
-        authorize_url=str(CONFIG.oidc.authorization_endpoint),
+        authorize_url=str(CONFIG.auth.oidc.authorization_endpoint),
         #authorize_params=None,
-        api_base_url=str(CONFIG.oidc.issuer),
+        api_base_url=str(CONFIG.auth.oidc.issuer),
         client_kwargs={
-            "scope": CONFIG.oidc.scopes,
+            "scope": CONFIG.auth.oidc.scopes,
             "code_challenge_method": "S256"
         },
-        server_metadata_url=str(CONFIG.oidc.well_known_url),
+        server_metadata_url=str(CONFIG.auth.oidc.well_known_url),
     )
 
-    initial_keys: JwksResponse = requests.get(str(CONFIG.oidc.jwks_uri)).json()
+    initial_keys: JwksResponse = requests.get(str(CONFIG.auth.oidc.jwks_uri)).json()
     OIDC_PUBKEYS["keys"].clear()
     OIDC_PUBKEYS["keys"].extend(initial_keys["keys"])
 
@@ -65,7 +65,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.get("/login")
 async def login(request: Request, next: str = "/"):
-    assert CONFIG.oidc is not None
+    assert CONFIG.auth.oidc is not None
 
     if "user" in request.session:
         request.session.pop("user")
@@ -89,7 +89,7 @@ async def logout(request: Request, next: str = "/"):
 
 @router.get("/auth")
 async def auth(request: Request):
-    assert CONFIG.oidc is not None
+    assert CONFIG.auth.oidc is not None
 
     if "user" in request.session:
         return RedirectResponse(url="/")
@@ -105,7 +105,7 @@ async def auth(request: Request):
     claims = jwt.decode(idt, key=OIDC_PUBKEYS, claims_cls=CodeIDToken)
     claims.validate()
 
-    username: str = claims[CONFIG.oidc.username_claim] if CONFIG.oidc.username_claim in claims else claims["sub"]
+    username: str = claims[CONFIG.auth.oidc.username_claim] if CONFIG.auth.oidc.username_claim in claims else claims["sub"]
     dn: str
     if "name" in claims:
         dn = claims["name"]
