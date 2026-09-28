@@ -52,7 +52,7 @@ if CONFIG.auth.oidc is not None:
 def get_user_from_token(token: str | None) -> User:
     if token is None:
         return User(details=None, backend=AuthBackend.NONE)
-    elif token == CONFIG.api.recovery_token:
+    elif token == CONFIG.auth.recovery_token:
         # Purely symbolic in this case, recovery admin bypasses ACLs
         return User(details=None, backend=AuthBackend.RECOVERY)
     # TODO: OIDC support here
