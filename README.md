@@ -4,13 +4,51 @@
 
 ## Setup
 
-A Dockerfile and `docker-compose.yml` are maintained in the repo and the image is available at `st4rburn/files`. These can be used as a base for setup.
+A Dockerfile and `docker-compose.yml` are maintained in the repo and the image is available at `st4rburn/files` on (Docker Hub](https://hub.docker.com/r/st4rburn/files). These can be used as a base for setup.
 
 By default, the share root folder is located at `/shares`. This is automatically set up by Docker, but should be mounted to a folder on the host for persistence. While configuration via environment variables should be possible, this has not been tested yet, so another mount should be created for `/app/config.toml`.
 
 ### Example Docker Command
 
 `# docker run -it --rm -v ./config.toml:/app/config.toml,readonly -v ./shares:/shares st4rburn/files`
+
+## Configuration
+
+Config consists on a TOML file containing four main sections listed below: auth, main, web, and shares.
+
+### Authentication
+
+#### Recovery Token
+
+```toml
+[auth]
+recovery_token = "<secure random string>"
+```
+
+This app allows you to specify a recovery token with full permissions over the web application. This should generally be left out of configuration, as adding one without needing to could allow an attacker access to all shares. Nevertheless, this can be a useful option for recovering info when permissions are broken and the backing filesystem is unavailable.
+
+#### OIDC
+
+```toml
+[auth.oidc]
+# Required for OIDC to work
+issuer = "https://issuer_url"
+client_id = "client_id_from_idp"
+# Optional
+scopes = "openid profile email"
+groups_claim = "groups"
+username_claim = "preferred_username"
+# Rarely needed, fallback if automatic discovery fails
+well_known_url = "https://..."
+authorization_endpoint = "https://..."
+token_endpoint = "https://..."
+end_session_endpoint = "https://..."
+jwks_uri = "https://..."
+```
+
+The primary method of authentication to the web app is designed to be OIDC. This documentation assumes knowledge of OIDC, however setup should usually be simple. An issuer URL is required, and from this the location of the `.well-known` endpoint provided by most IdPs will be calculated and used to find other relevant endpoints (the well known URL can also be specified if the app fails to find it). If this fails, these may be specified manually. The application also requires its client ID from the IdP. A client secret is not required as PKCE is used to verify the authentication.
+
+The default claim for username is `preferred_username`, however see the [security](#Security) section below for how to configure this if your users control this claim's value. A groups claim can also be used to set permissions in shares, and scopes can be defined in case an additional scope is required to access group info.
 
 ## Security
 

@@ -31,7 +31,6 @@ class OidcConfig(BaseModel):
     client_id: str
     scopes: str = "openid profile email"
     groups_claim: str = "groups"
-    roles_claim: str = "roles"
     username_claim: str = "preferred_username"
 
     private__well_known_url: HttpUrl | None = Field(
