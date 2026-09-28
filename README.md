@@ -14,7 +14,7 @@ By default, the share root folder is located at `/shares`. This is automatically
 
 ## Configuration
 
-Config consists on a TOML file containing four main sections listed below: auth, main, web, and shares.
+Config consists on a TOML file containing four main sections listed below: [auth](#Authentication), [main](#Main), [web](#Web), and [shares](#Shares).
 
 ### Authentication
 
@@ -106,6 +106,67 @@ The locations of any additional styles or scripts to load relative to the app's 
 
 #### Extra Head
 Extra HTML code to inject directly into the head of every web page.
+
+### Shares
+
+#### Example
+
+Shares have several options for more full customisation, a full example is shown below:
+
+```toml
+[[share]]
+# Share in the root folder
+path = "/documents"
+# Display name / title
+title = "Documents"
+real = "/mnt/sda1/documents"
+# Permissions - as granular as possible:
+#   l - list (but not download)
+#   d - download (but not list)
+#   u - upload
+#   r - remove / delete
+#   m - move
+#   . - see hidden files in list
+#   * - all
+[share.perms.group]
+admin = "*"
+documents_owner = "ldur"
+[share.perms.user]
+ALL = "l"
+AUTHED = "d"
+```
+
+The above example defines a share called 'Documents', at path '/documents' in the main app. This means the share will be visible to users who can access it from '/', the main page. While most shares will have their files located at their path below the share root path (defined in [main](#Main), and would be `<root>/documents` in this case), the usage of 'real' means the files for this share are stored at `/mnt/sda1/documents`. Shares using the 'real' option should ideally not contain any lower shares as subfolders can be overriden by these lower shares and may become inaccessible.
+
+Permissions are explained in-depth below.
+
+#### Permission Configuration
+
+Permissions are divided into users and groups and specific access controls are parsed as shown above.
+
+```toml
+[share.perms.group]
+admin = "*"
+documents_owner = "ldur"
+[share.perms.user]
+ALL = "l"
+AUTHED = "d"
+```
+
+This permissions section uses two groups: 'admin' and 'documents_owner'. Both of these groups would be obtained from a user's OIDC claims in a normal setup. Admin has all permissions, and documents_owner can list, download, upload, and remove (delete). Additionally, all users can list files and authenticated users can download. A user's final permissions are defined by combining all the categories they fit into. In this case, an authenticated user fits into ALL and AUTHED, gaining both the ability to list and download files. This is also stacked with groups, meaning the 'ld' in 'documents_owner' are redundant.
+
+There are no default permissions and permissions are not inherited between shares.
+
+#### Permission Access Levels
+
+- LIST (`l`) - List files in a share and see the share from web panel.
+- DOWNLOAD (`d`) - Download files via direct link (allowed even when list is disabled).
+- UPLOAD (`u`) - Upload files to a folder, can work without list permission but the web panel currently does not support this.
+- REMOVE (`d`) - Delete files from share. Does work without list, but not in the web panel.
+- MOVE (`m`) - Move/rename files. Moving files between shares requires remove in the origin and upload in the destination.
+- DOTFILES (`.`) - View dotfiles (files that start with `.` and would be hidden on UNIX). Only partial support currently, but this is required along with list to list dotfiles.
+- ALL (`*`) - assign all permissions.
+- NONE (`-`) - symbolises no permissions.
 
 ## Security
 

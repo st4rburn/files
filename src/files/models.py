@@ -8,7 +8,7 @@ from pydantic import BaseModel, DirectoryPath, Field, field_validator, GetCoreSc
 from pydantic_core import CoreSchema, core_schema
 from typing import Any, Self
 
-PERMKEY_AUTHED_USERS: str = "AUTH"
+PERMKEY_AUTHED_USERS: str = "AUTHED"
 PERMKEY_ALL_USERS: str = "ALL"
 PERMKEY_SELF: str = "SELF"
 
