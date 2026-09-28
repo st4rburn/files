@@ -10,6 +10,7 @@ from .config import CONFIG, ShareConfig
 from .filesystem import FILESYSTEM, File, Folder
 from .models import ShareACL, User
 
+# Get authorisation from either bearer token or session
 def eval_auth(
     request: Request,
     authorization: Annotated[str | None, Header()] = None
@@ -17,9 +18,9 @@ def eval_auth(
     session_user: User | None = request.session.get("user")
     if session_user is not None:
         return User.model_validate(session_user)
-    elif authorization:
-        # TODO: FIX THIS
-        return auth.get_user_from_token(authorization)
+    elif authorization is not None and authorization.lower().startswith("bearer "):
+        bearer: str = authorization[len("bearer "):]
+        return auth.get_user_from_token(bearer)
 
     return auth.get_user_from_token(None)
 

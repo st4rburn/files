@@ -7,7 +7,7 @@ from authlib.jose import jwt, JsonWebToken, KeySet
 from authlib.jose.errors import JoseError
 from authlib.oidc.core import CodeIDToken
 from cachetools import TTLCache, cached
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import RedirectResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from starlette.requests import Request
@@ -49,16 +49,14 @@ if CONFIG.auth.oidc is not None:
     OIDC_PUBKEYS["keys"].extend(initial_keys["keys"])
 
 
-
 def get_user_from_token(token: str | None) -> User:
     if token is None:
         return User(details=None, backend=AuthBackend.NONE)
     elif token == CONFIG.api.recovery_token:
         # Purely symbolic in this case, recovery admin bypasses ACLs
         return User(details=None, backend=AuthBackend.RECOVERY)
-    elif ...:
-        ...
-    raise NotImplementedError()
+    # TODO: OIDC support here
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="bad token")
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
