@@ -15,3 +15,6 @@
 <!-- Not relying on window.location allows us to host the app at
      different paths. -->
 <script type="text/javascript">const CURRENT_PATH="{{ path }}";</script>
+{% if conf.extra_head != None %}
+{{ conf.extra_head | safe }}
+{% endif %}

@@ -114,6 +114,7 @@ class WebButtonsConfig(BaseModel):
     rename: str = "rename"
     download: str = "download"
     # Capitals standard for top nav items
+    upload: str = "Choose File"
     mkdir: str = "New Folder"
 
 class WebConfig(BaseModel):

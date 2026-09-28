@@ -17,7 +17,7 @@
         {% endif %}
         {% if obj.can_upload(user) %}
         <form id="upload-form" action="{{ obj.path }}" method="POST" enctype="multipart/form-data">
-            <label id="upload-label" class="button" for="upload-input" class="custom-file-label">Choose File</label>
+            <label id="upload-label" class="button" for="upload-input" class="custom-file-label">{{ conf.buttons.upload }}</label>
             <input type="file" id="upload-input" name="file">
             <button type="submit" id="upload-name" style="display: none;"></button>
         </form>
