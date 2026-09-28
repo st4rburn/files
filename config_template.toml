@@ -1,14 +1,57 @@
 [main]
-# No shares are allowed to exit this directory
-share_root = "./shares/"
+site_root = "https://files.example.com/"
+share_root = "/shares"
+session_secret = "<securely generated random string>"
+debug = false
 
 [auth]
+recovery_token = "<secure random string>"
+
+[auth.oidc]
+# Required for OIDC to work
+issuer = "https://issuer_url"
+client_id = "client_id_from_idp"
+# Optional
+scopes = "openid profile email"
+groups_claim = "groups"
+username_claim = "preferred_username"
+# Rarely needed, fallback if automatic discovery fails
+well_known_url = "https://..."
+authorization_endpoint = "https://..."
+token_endpoint = "https://..."
+end_session_endpoint = "https://..."
+jwks_uri = "https://..."
+
+[web]
+api_path = "/_"
+default_style = true
+extra_styles = []
+default_script = true
+extra_scripts = []
+extra_head = "<script>some injected JS</script>"
+[web.buttons]
+delete = "delete"
+rename = "rename"
+download = "download"
+upload = "Choose File"
+mkdir = "New Folder"
+
+# Shares
+[[share]]
+path = "/"
+title = "Root Share"
+[share.perms.user]
+# Authed users can list files, non-authed
+# can download with direct link
+ALL = "d"
+AUTHED = "l"
 
 [[share]]
 # Share in the root folder
-path = "/"
+path = "/documents"
 # Display name / title
-title = "Root Share"
+title = "Documents"
+real = "/mnt/sda1/documents"
 # Permissions - as granular as possible:
 #   l - list (but not download)
 #   d - download (but not list)
@@ -18,19 +61,20 @@ title = "Root Share"
 #   . - see hidden files in list
 #   * - all
 [share.perms.group]
-ALL = "ld"
 admin = "*"
+documents_owner = "ldur"
 [share.perms.user]
-ALL = "ld"
+ALL = "l"
+AUTHED = "d"
 
 [[share]]
-# Use ${GROUP} and ${USER} to dynamically create shares for users and groups
-path = "/g/${GROUP}"
-# Special names:
-#   SELF - the group/user this group is associated with
-#   ALL - all users, including non-login
-#   AUTH - all authenticated users
-[share.perms.group]
-SELF = "ldurm"
-ALL = "ld"
+path = "/private"
+# No permissions = no one can enumerate below this
+
+[[share]]
+path = "/private/secrets"
+# Allow all permissions for admin, list+download for secret viewer user
+[share.perms.user]
 admin = "*"
+secret_viewer = "ld"
+```

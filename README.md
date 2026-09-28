@@ -53,6 +53,7 @@ The default claim for username is `preferred_username`, however see the [securit
 ### Main
 
 ```toml
+[main]
 site_root = "https://files.example.com/"
 share_root = "/shares"
 session_secret = "<securely generated random string>"
