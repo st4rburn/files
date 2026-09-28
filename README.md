@@ -223,3 +223,8 @@ secret_viewer = "ld"
 
 - [ ] SMB
   - [ ] Support LDAP/Kerberos auth
+
+### Platforms/Packaging
+
+- [ ] Build for ARM64
+- [ ] Automate builds
