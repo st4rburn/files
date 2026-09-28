@@ -4,7 +4,7 @@
 
 ## Setup
 
-A Dockerfile and `docker-compose.yml` are maintained in the repo and the image is available at `st4rburn/files` on (Docker Hub](https://hub.docker.com/r/st4rburn/files). These can be used as a base for setup.
+A Dockerfile and `docker-compose.yml` are maintained in the repo and the image is available at `st4rburn/files` on [Docker Hub](https://hub.docker.com/r/st4rburn/files). These can be used as a base for setup.
 
 By default, the share root folder is located at `/shares`. This is automatically set up by Docker, but should be mounted to a folder on the host for persistence. While configuration via environment variables should be possible, this has not been tested yet, so another mount should be created for `/app/config.toml`.
 
@@ -49,6 +49,63 @@ jwks_uri = "https://..."
 The primary method of authentication to the web app is designed to be OIDC. This documentation assumes knowledge of OIDC, however setup should usually be simple. An issuer URL is required, and from this the location of the `.well-known` endpoint provided by most IdPs will be calculated and used to find other relevant endpoints (the well known URL can also be specified if the app fails to find it). If this fails, these may be specified manually. The application also requires its client ID from the IdP. A client secret is not required as PKCE is used to verify the authentication.
 
 The default claim for username is `preferred_username`, however see the [security](#Security) section below for how to configure this if your users control this claim's value. A groups claim can also be used to set permissions in shares, and scopes can be defined in case an additional scope is required to access group info.
+
+### Main
+
+```toml
+site_root = "https://files.example.com/"
+share_root = "/shares"
+session_secret = "<securely generated random string>"
+debug = false
+```
+
+#### Site Root
+Defines the base URL of the application, allowing the site to be hosted at subpaths such as 'https://example.com/files/app'. **Note that this is currently untested.**
+
+### Share Root
+The root folder for all shares on the disk (unless otherwise specified in share config). This should not be touched when using Docker as it defaults to '/shares', but other configurations may wish to change this.
+
+### Session Secret
+Used to encrypt session data, should be randomly generated and is usually 32 bytes of random data converted to hexadecimal.
+
+### Debug
+Currently unused, but will enable more verbose errors.
+
+### Web
+
+```toml
+[web.buttons]
+delete = "delete"
+rename = "rename"
+download = "download"
+upload = "Choose File"
+mkdir = "New Folder"
+```
+
+#### Web Buttons
+Defines text found on default control buttons, allowing for easier modification and styling.
+
+```toml
+[web]
+api_path = "/_"
+default_style = true
+extra_styles = []
+default_script = true
+extra_scripts = []
+extra_head = "<script>some injected JS</script>"
+```
+
+#### API Path
+Where supporting API routes are found, generally does not need changing but importantly a share with this same path may introduce bugs.
+
+#### Default Style / Script
+Whether to use the default CSS / JavaScript bundled with the app. The recommendation is to always keep the JavaScript enabled, but CSS can be disabled if a style overhaul is being done in a theme.
+
+#### Extra Styles / Scripts
+The locations of any additional styles or scripts to load relative to the app's 'static/extra' folder. CSS is stored in 'static/extra/css' and JavaScript in 'static/extra/js'. In Docker, this means the folder to mount would be '/app/static/extra', and CSS and JS would be stored in 'css' and 'js' subfolders respectively.
+
+#### Extra Head
+Extra HTML code to inject directly into the head of every web page.
 
 ## Security
 
