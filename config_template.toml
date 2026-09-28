@@ -77,4 +77,3 @@ path = "/private/secrets"
 [share.perms.user]
 admin = "*"
 secret_viewer = "ld"
-```
