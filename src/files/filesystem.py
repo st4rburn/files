@@ -333,6 +333,7 @@ class Folder(BaseModel):
             path = old_parts
 
         # Filter out .. and . before they can be allowed on the filesystem
+        # Also process '/'
         fixed: list[str] = []
         for part in path:
             if part == ".":
@@ -342,6 +343,17 @@ class Folder(BaseModel):
                     _ = fixed.pop(-1)
                 else:
                     continue
+            elif part.startswith("/"):
+                # '/' sends us back to the root
+                fixed.clear()
+                # Trim them off, do we have other pieces?
+                trimmed: str = part.strip("/")
+                if not trimmed:
+                    # No, keep going
+                    continue
+                # This should not be allowed or possible, but
+                # if it happens could be a security issue
+                raise ValueError("Part of path contained '/' after trimming, has a string path been included in a Path object?")
             else:
                 fixed.append(part)
         return fixed
