@@ -4,7 +4,7 @@
 
 ## Setup
 
-A Dockerfile and `docker-compose.yml` are maintained in the repo and the image is available at `st4rburn/files` on [Docker Hub](https://hub.docker.com/r/st4rburn/files). These can be used as a base for setup.
+A Dockerfile and `docker-compose.yml` are maintained in the repo and the image is available at `st4rburn/files` on [Docker Hub](https://hub.docker.com/r/st4rburn/files) for Linux on both x86_64 and ARM64. These can be used as a base for setup.
 
 By default, the share root folder is located at `/shares`. This is automatically set up by Docker, but should be mounted to a folder on the host for persistence. While configuration via environment variables should be possible, this has not been tested yet, so another mount should be created for `/app/config.toml`.
 
@@ -223,8 +223,3 @@ secret_viewer = "ld"
 
 - [ ] SMB
   - [ ] Support LDAP/Kerberos auth
-
-### Platforms/Packaging
-
-- [ ] Build for ARM64
-- [ ] Automate builds
