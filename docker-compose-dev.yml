@@ -1,8 +1,8 @@
 services:
   files:
-    # For use with a reverse proxy
-    hostname: files
-    image: st4rburn/files
+    build:
+      context: .
+      dockerfile: Dockerfile
     # Ensure config files and shares are mounted so data persists
     volumes:
       - ./config.toml:/app/config.toml:ro
