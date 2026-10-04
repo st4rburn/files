@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import BinaryIO
 from fastapi import UploadFile
 from pydantic import BaseModel, Field
+import shutil
 
 from .config import CONFIG
 from .models import PermissionDenied, ShareACL, ShareConfig, SharePerms, User
@@ -88,11 +89,15 @@ class File(BaseModel):
         # Make sure parent doesn't have any child shares with this
         # name or any folders
         new_name: str = new_path.name
-        if new_path.exists() or new_name in new_parent.children:
+        new_real: Path = new_parent.real_path / new_name
+        if new_real.exists() or new_name in new_parent.children:
             raise FileExistsError("Share or folder already exists with this path")
 
         # Do the move
-        self.real_path.rename(new_parent.real_path / new_name)
+        # This is only okay because we checked if anything exists at 'new_real first'
+        # If a folder existed there and we did this without checking, the file could
+        # be moved into the folder regardless of defined permissions.
+        shutil.move(str(self.real_path), str(new_real))
         self.folder = new_parent
         self.name = new_name
 
@@ -225,10 +230,15 @@ class Folder(BaseModel):
         # Make sure parent doesn't have any child shares with this
         # name or any folders
         new_name: str = new_path.name
-        if new_path.exists() or new_name in new_parent.children:
+        new_real: Path = new_parent.real_path / new_name
+        if new_real.exists() or new_name in new_parent.children:
             raise FileExistsError("Share or folder already exists with this path")
 
-        self.real_path.rename(new_parent.real_path / new_name)
+        # Do the move
+        # This is only okay because we checked if anything exists at 'new_real first'
+        # If a folder existed there and we did this without checking, the file could
+        # be moved into the folder regardless of defined permissions.
+        shutil.move(str(self.real_path), str(new_real))
         self.path_components.clear()
         self.path_components += Folder.neat_path(new_path)
 
