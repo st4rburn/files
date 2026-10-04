@@ -10,9 +10,9 @@ from datetime import timedelta
 import requests
 import tomllib
 from pathlib import Path
-from pydantic import BaseModel, DirectoryPath, Field, FilePath, field_validator, HttpUrl
+from pydantic import BaseModel, DirectoryPath, Field, FilePath, ValidationError, field_validator, HttpUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import Annotated, Self
+from typing import Annotated, Any, Self
 
 from .models import ShareACL, SharePerms, ShareConfig, User
 
@@ -105,8 +105,49 @@ class OidcConfig(BaseModel):
         assert self.private__jwks_uri is not None
         return self.private__jwks_uri
 
+class LocalUser(BaseModel):
+    name: str
+    hash: bytes # Automatically encodes as UTF-8
+    display: str
+    groups: list[str] = Field(default_factory=list)
+
+    @field_validator("hash", mode="after")
+    @classmethod
+    def check_hash(cls, hash: bytes) -> bytes:
+        if hash.startswith(b"INSECURE_PLAINTEXT:"):
+            return hash
+        elif hash.startswith(b"$2"):
+            # VERY weak bcrypt checker
+            # This is only for a user's sanity
+            return hash
+        raise ValidationError("Local user hashes must be either bcrypt, or plaintext starting with 'INSECURE_PLAINTEXT:'.")
+
+class LocalAuthConfig(BaseModel):
+    user: dict[str, LocalUser]
+
+    @field_validator("user", mode="before")
+    @classmethod
+    def process_users(cls, raw: Any) -> dict[str, LocalUser]:
+        result: dict[str, LocalUser] = {}
+        if not isinstance(raw, dict):
+            raise ValidationError("Expected dictionary of users.")
+        for k, v in raw.items():
+            # Just a password
+            if isinstance(v, str):
+                result[k] = LocalUser(name=k, display=k, hash=v)
+            elif isinstance(v, dict):
+                # If there's a duplicate name field Pydantic will error
+                # This is fine as you shouldn't be able to specify a different
+                # name here
+                result[k] = LocalUser(name=k, **v)
+            else:
+                raise ValidationError("Users must be either a username key and a password/hash value, or a username key and a user dictionary value.")
+
+        return result
+
 class AuthConfig(BaseModel):
     oidc: OidcConfig | None = None
+    local: LocalAuthConfig | None = None
     recovery_token: str | None = None
 
 class WebButtonsConfig(BaseModel):
@@ -129,7 +170,7 @@ class WebConfig(BaseModel):
     @classmethod
     def ensure_files(cls, path: Path, base: Path) -> None:
         if path.is_absolute() or not (base / path).is_file():
-            raise ValueError(f"Path must be a real file relative to app's '{base}'")
+            raise ValidationError(f"Path must be a real file relative to app's '{base}'")
 
     @field_validator("extra_styles")
     @classmethod
@@ -175,7 +216,7 @@ class Config(BaseSettings):
         paths: set[Path] = set()
         for share in shares:
             if share.path in paths:
-                raise ValueError(f"Multiple shares with path '{share.path}'")
+                raise ValidationError(f"Multiple shares with path '{share.path}'")
             else:
                 paths.add(share.path)
         return shares

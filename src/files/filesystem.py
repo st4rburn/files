@@ -337,10 +337,8 @@ class Folder(BaseModel):
     def neat_path(path: Path | list[str]) -> list[str]:
         # Convert path to list first
         if isinstance(path, Path):
-            old_parts: list[str] = list(path.parts)
-            if old_parts and old_parts[0] == "/":
-                _ = old_parts.pop(0)
-            path = old_parts
+            # Parts with '/' will be eliminated later
+            path = list(path.parts)
 
         # Filter out .. and . before they can be allowed on the filesystem
         # Also process '/'
