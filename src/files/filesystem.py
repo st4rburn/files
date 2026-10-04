@@ -344,7 +344,7 @@ class Folder(BaseModel):
         # Also process '/'
         fixed: list[str] = []
         for part in path:
-            if part == ".":
+            if part == "." or part == "~":
                 continue
             elif part == "..":
                 if fixed:
