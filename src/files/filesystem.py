@@ -288,6 +288,8 @@ class Folder(BaseModel):
             # Directories first (False = 0), then alphabetical
             generator = sorted(generator, key=lambda path: (not path.is_dir(), path.name))
         for item in generator:
+            if item.name.startswith(".") and not dotfiles:
+                continue
             if item.is_dir():
                 if item.name in self.children:
                     yield self.children[item.name]
@@ -298,8 +300,6 @@ class Folder(BaseModel):
                         type=FolderType.PHYSICAL,
                     )
             elif item.is_file():
-                if item.name.startswith(".") and not dotfiles:
-                    continue
                 yield File(
                     folder=self,
                     name=item.name
